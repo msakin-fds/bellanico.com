@@ -4,52 +4,78 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Status
 
-This repo is the workspace for maintaining the WordPress site at **bellanico.com**, hosted on **SiteGround**. It does not yet contain the site's source — those files live on the server and are accessed via SSH. Over time, themes/custom plugins should be checked in here and deployed outward.
+Workspace for maintaining the WordPress site at **bellanico.com** (hosted on SiteGround). The site's PHP source currently lives on the server; this repo holds connection scaffolding and will accumulate theme/plugin source as it is pulled down.
 
-## Prerequisites (one-time, on a desktop machine)
+## Connection model (Option A — REST-only)
 
-The tooling assumes a persistent local environment (Claude Code desktop app, not web sessions — web sandboxes lose `~/.ssh/` between sessions, breaking key-based auth).
+This project is deliberately set up for **Claude Code web sessions**, which are ephemeral. Everything flows through the WordPress REST API over HTTPS, authenticated with an **application password**. There is no SSH, no WP-CLI, no local file sync.
 
-1. `ssh`, `curl`, `rsync`, `gzip`, `tar` available on PATH.
-2. Run `./scripts/setup.sh` once. It:
-   - Generates `~/.ssh/bellanico_siteground` (ed25519) if missing.
-   - Adds a `~/.ssh/config` entry aliased `bellanico-siteground`.
-   - Copies `.env.example` to `.env`.
-   - Prints the public key to paste into SiteGround → *Devs → SSH Keys Manager → Import*.
-3. Fill `.env` with values from SiteGround (host/user/port) and WordPress (application password).
+### Scope of the REST API
 
-## Connection architecture
+Reachable via the API (use it freely):
+- Posts, pages, custom post types, revisions
+- Taxonomies, terms, menus
+- Users (read/update self; full control for admins)
+- Media library (upload, update, delete)
+- Settings (site title, tagline, reading/discussion options, permalinks)
+- Most plugins' custom endpoints (varies by plugin)
 
-Two independent channels to the live site — use whichever is simpler for the task:
+**Not** reachable via the REST API:
+- Direct PHP/theme file edits, `wp-config.php`
+- Database schema or arbitrary SQL
+- Server logs, cron, file system
 
-| Channel | Script | Use for |
-|---|---|---|
-| WP REST API (HTTPS + app password) | `./scripts/api.sh METHOD /path [curl-args]` | posts, pages, users, menus, plugin/theme endpoints |
-| SSH + WP-CLI | `./scripts/wp.sh <wp subcommand>` | DB queries, bulk ops, config, search-replace |
-| Raw SSH | `./scripts/ssh.sh "<remote-cmd>"` | file inspection, PHP/theme edits, logs |
-| Backup | `./scripts/backup.sh` | pre-change DB dump + `wp-content` archive → `./backups/` (gitignored) |
+For those, we need a different channel (SSH or SFTP), which is incompatible with web sessions. Flag the limitation to the user and surface alternatives (e.g. WP admin UI, a one-off desktop session, or a SiteGround backup-restore).
 
-All scripts read credentials/paths from `.env` (gitignored). Never hardcode secrets in scripts or commits.
+## Per-session setup
 
-## Verification commands
+`.env` is gitignored and does not persist between web sessions. At the start of a new session:
 
-After `setup.sh` and filling `.env`:
+1. The user provides the WP application password (paste in chat, or recreate `.env`).
+2. If pasted: write `/home/user/bellanico.com/.env` with:
+   ```
+   SITE_URL=https://bellanico.com
+   WP_USER=<login username>
+   WP_APP_PASSWORD=<24 chars, spaces ok>
+   ```
+3. Verify:
+   ```bash
+   ./scripts/api.sh GET /wp/v2/users/me
+   ```
+   Expect a JSON object with the user's id/name. A 401 means bad credentials; a 403 means the app password lacks capability for that endpoint.
+
+## Everyday operations
 
 ```bash
-./scripts/ssh.sh "whoami && hostname && pwd"      # SSH auth works
-./scripts/wp.sh core version                      # WP-CLI reachable
-./scripts/api.sh GET /wp/v2/users/me              # REST API auth works
+# Read
+./scripts/api.sh GET  "/wp/v2/posts?per_page=5&_fields=id,title,status"
+./scripts/api.sh GET  /wp/v2/pages
+./scripts/api.sh GET  /wp/v2/plugins         # requires admin
+
+# Write
+./scripts/api.sh POST /wp/v2/posts -d '{"title":"Draft","status":"draft"}'
+./scripts/api.sh POST /wp/v2/posts/123 -d '{"title":"Updated"}'
+./scripts/api.sh DELETE /wp/v2/posts/123
+
+# Media upload (multipart; pass curl flags directly)
+./scripts/api.sh POST /wp/v2/media \
+  -H "Content-Disposition: attachment; filename=hero.jpg" \
+  -H "Content-Type: image/jpeg" \
+  --data-binary @./hero.jpg
 ```
 
-## Operational guardrails
+`api.sh` reads `.env`, strips spaces from the app password, and surfaces HTTP error bodies (`--fail-with-body`) so failures are debuggable.
 
-- **Always `./scripts/backup.sh` before** schema changes, plugin updates, search-replace, or anything touching the DB.
-- Prefer staging (SiteGround's one-click staging site) for non-trivial work; point `.env` at staging, verify, then switch back.
-- Commit theme/plugin source into this repo as it's pulled down, so changes are reviewable in git before being pushed back to the server.
+## Guardrails
+
+- **Always read before write.** GET the current resource first, show the user the diff you intend to POST, confirm, then write.
+- **Drafts over publishes.** For new content, create with `"status":"draft"` unless the user explicitly asks to publish.
+- **No bulk destructive calls without confirmation** (e.g. DELETE loops, mass status changes). State what you're about to do, ask, then act.
+- **Secrets never leave `.env`.** Don't echo `WP_APP_PASSWORD`, don't commit `.env`, don't paste it into GitHub/PR bodies.
+- If an operation genuinely needs SSH/DB access, stop and tell the user — don't improvise a workaround.
 
 ## Future additions to this file
 
-As the project grows, document here:
-- Build / lint / test commands (including single-test invocation).
-- Deployment flow (git → SiteGround Git integration, or rsync push script).
-- Any Cursor (`.cursor/rules/`, `.cursorrules`) or Copilot (`.github/copilot-instructions.md`) conventions once introduced.
+- Theme/plugin source once it's pulled into the repo, plus a deployment path (e.g. GitHub Action with a SiteGround deploy key — handled by the user, not by web sessions).
+- Build / lint / test commands once tooling is introduced.
+- Any Cursor (`.cursor/rules/`) or Copilot (`.github/copilot-instructions.md`) conventions once they exist.

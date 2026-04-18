@@ -1,0 +1,30 @@
+# Secrets
+.env
+.env.local
+*.pem
+*.key
+id_*
+!id_*.pub
+
+# Node / build
+node_modules/
+dist/
+build/
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Local backups / dumps
+*.sql
+*.sql.gz
+backups/
+
+# Claude Code local overrides
+.claude/settings.local.json

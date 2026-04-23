@@ -6,5 +6,5 @@ __pycache__/
 .DS_Store
 *.sql
 *.log
-reports/*.docx
+# reports/*.docx — committed intentionally
 reports/*.pdf

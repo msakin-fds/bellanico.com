@@ -127,6 +127,13 @@ function MoveOut($t) {
     NL
 }
 
+# FE = Front End (visible on site), BE = Back End (code/settings), BT = Both
+function WhereBadge($t,$row,$col,$type) {
+    if     ($type -eq 'FE') { TC $t $row $col 'FRONT END' $true $WHITE  9 1 $BLUE  }
+    elseif ($type -eq 'BE') { TC $t $row $col 'BACK END'  $true $WHITE  9 1 $NAVY  }
+    else                    { TC $t $row $col 'BOTH'      $true $DKGRAY 9 1 $BGYEL }
+}
+
 # ============================================================
 # COVER PAGE
 # ============================================================
@@ -207,17 +214,19 @@ Body 'Traditional SEO gets you ranked on Google blue links. AI SEO gets you CITE
 Body 'Today approximately 45% of Google searches show an AI Overview at the top. ChatGPT, Perplexity, and Gemini are used by millions of people to research food products and suppliers. When a buyer, retailer, or consumer asks "Who makes Veggie Values frozen vegetables?" or "Where can I buy club-pack frozen corn?" -- AI tools compose a direct answer and cite their sources. Bella Nico is not currently among those sources.'
 
 NL; H2 'Key Findings at a Glance'
-$kft = MakeTable 9 3
-HRow $kft @('Finding','Status','Action Required')
+Body 'Where: FRONT END = changes visible on the website (content, text, images).  BACK END = behind the scenes (code, plugin settings, server files).' $DKGRAY $false $true
+$kft = MakeTable 9 5
+HRow $kft @('Finding','Status','Where','Action Required','Effect Timeline')
+# cols: Finding | Status | Where FE/BE | Action | Effect Timeline (after fix, when AI notices)
 $kfd = @(
-    @('AI bots can access the site (no robots.txt blocking)',    'PARTIAL -- no robots.txt exists', 'Create robots.txt immediately'),
-    @('FAQ page content',                                        'LOREM IPSUM placeholder text',    'Replace with real content urgently'),
-    @('Contact info on FAQ page',                               'Shows demo email info@agroly.com', 'Update to real Bella Nico contact info'),
-    @('Schema / structured data',                               'ZERO -- AIOSEO not configured',   'Configure AIOSEO schema settings'),
-    @('XML sitemap',                                            'Not enabled in AIOSEO',            'Enable and submit sitemap'),
-    @('Image alt text',                                         '436 images missing alt text',      'Add alt text to all product images'),
-    @('Blog or educational content',                            'Zero published posts',             'Start publishing brand and product content'),
-    @('Plugin updates',                                         '16 plugins awaiting updates',      'Update all plugins after site backup')
+    @('AI bots access the site -- no robots.txt exists',     'PARTIAL -- unguided crawl',        'BE', 'Create robots.txt and enable AIOSEO sitemap',          'Crawlers guided within days'),
+    @('FAQ page content',                                    'LOREM IPSUM placeholder text',     'FE', 'Replace with real Bella Nico questions and answers',   'AI re-index in 2-4 weeks'),
+    @('Contact info on FAQ page',                           'Shows demo email info@agroly.com',  'FE', 'Update to real Bella Nico contact details',            'Immediate on next crawl'),
+    @('Schema / structured data',                           'ZERO -- AIOSEO not configured',     'BE', 'Configure Organization, Product and FAQPage in AIOSEO','AI citation improves in 2-4 weeks'),
+    @('XML sitemap',                                        'Not enabled in AIOSEO',             'BE', 'Enable AIOSEO sitemap and submit to Search Console',   'Product pages indexed in 1-2 weeks'),
+    @('Image alt text',                                     '436 images missing alt text',       'BE', 'Add alt text via Media Library or AIOSEO image SEO',  'Crawlers read images on next visit'),
+    @('Blog or educational content',                        'Zero published posts',              'FE', 'Start publishing brand and product content',           'Citations possible in 4-8 weeks'),
+    @('Plugin updates',                                     '16 plugins awaiting updates',       'BE', 'Update all plugins after full site backup',            'Security and performance: immediate')
 )
 for ($r=0;$r -lt $kfd.Count;$r++) {
     $isPass = $kfd[$r][1] -like '*PASS*'
@@ -225,7 +234,9 @@ for ($r=0;$r -lt $kfd.Count;$r++) {
     $rfg = if ($isPass) { $GREEN } else { $RED_T }
     TC $kft ($r+2) 1 $kfd[$r][0] $false $DKGRAY 10 0 $LGRAY
     TC $kft ($r+2) 2 $kfd[$r][1] $true  $rfg    10 0 $rbg
-    TC $kft ($r+2) 3 $kfd[$r][2] $false $DKGRAY 10 0
+    WhereBadge $kft ($r+2) 3 $kfd[$r][2]
+    TC $kft ($r+2) 4 $kfd[$r][3] $false $DKGRAY 10 0
+    TC $kft ($r+2) 5 $kfd[$r][4] $false $GREEN  10 0 $BGGRN
 }
 MoveOut $kft
 PB
@@ -343,20 +354,21 @@ Code ("Bella Nico Inc. is a Canadian frozen food distributor established in 1995
 Body 'The addition of company type (Canadian, frozen food distributor), specific product context, and the clear packaging innovation gives AI engines fully extractable, verifiable sentences.' $GREEN $false $true
 
 NL; H2 'Extractability Checklist'
-$ect = MakeTable 7 3
-HRow $ect @('Content Check','Current Status','Target')
+$ect = MakeTable 7 4
+HRow $ect @('Content Check','Current Status','Where','Target')
 $ecd = @(
-    @('Citable definition in first paragraph',   'MISSING on all pages',     'Homepage and all product pages'),
-    @('FAQ page with real content',              'Lorem Ipsum placeholder',  'Replace with 10+ real Q and A pairs'),
-    @('Correct company contact information',     'Shows wrong demo email',   'All pages show real Bella Nico contact'),
-    @('Self-contained answer blocks, 40 to 60 words','MISSING',              '3+ per product page'),
-    @('Blog or informational articles',          'Zero published',           'Start with product and brand stories'),
-    @('"Last Updated" date visible on pages',    'MISSING on all pages',     'All content pages')
+    @('Citable definition in first paragraph',   'MISSING on all pages',    'FE', 'Homepage and all product pages'),
+    @('FAQ page with real content',              'Lorem Ipsum placeholder', 'FE', 'Replace with 10+ real Q and A pairs'),
+    @('Correct company contact information',     'Shows wrong demo email',  'FE', 'All pages show real Bella Nico contact'),
+    @('Self-contained answer blocks 40-60 words','MISSING',                 'FE', '3+ per product page'),
+    @('Blog or informational articles',          'Zero published',          'FE', 'Start with product and brand stories'),
+    @('"Last Updated" date visible on pages',    'MISSING on all pages',    'BE', 'All content pages')
 )
 for ($r=0;$r -lt $ecd.Count;$r++) {
     TC $ect ($r+2) 1 $ecd[$r][0] $false $DKGRAY 10 0
     TC $ect ($r+2) 2 $ecd[$r][1] $true  $RED_T  10 0 $BGRED
-    TC $ect ($r+2) 3 $ecd[$r][2] $false $GREEN  10 0 $BGGRN
+    WhereBadge $ect ($r+2) 3 $ecd[$r][2]
+    TC $ect ($r+2) 4 $ecd[$r][3] $false $GREEN  10 0 $BGGRN
 }
 MoveOut $ect
 PB
@@ -437,26 +449,27 @@ Body 'No page shows a "Last Updated" date to the visitor or to AI crawlers in st
 Body '16 plugins are awaiting updates, including Elementor v3.25 to v4.0, ACF Pro v5.9 to v6.8, and AIOSEO v4.9.4 to v4.9.6. Outdated plugins signal site neglect to technical crawlers.' $RED_T
 
 NL; H2 'Page Freshness Audit'
-$fat = MakeTable 9 3
-HRow $fat @('Page / Content','Current State','Action')
+$fat = MakeTable 9 4
+HRow $fat @('Page / Content','Current State','Where','Action')
 $fad = @(
-    @('FAQ page content',          'Lorem Ipsum placeholder -- never replaced',  'URGENT -- replace with real content'),
-    @('FAQ page contact email',    'info@agroly.com (wrong company)',            'URGENT -- update to real contact info'),
-    @('Blog / news section',       'Does not exist',                            'Create and begin publishing'),
-    @('Plugin updates',            '16 plugins outdated',                       'Update after site backup'),
-    @('AIOSEO version',            '4.9.4.1 (update to 4.9.6.2 available)',     'Update -- AEO improvements in newer version'),
-    @('Elementor version',         '3.25.6 (major v4.0 release available)',     'Update after testing in staging'),
-    @('"Last Updated" dates',      'Missing on all pages',                      'Add to all content pages'),
-    @('Homepage year references',  '2026 mentioned correctly -- GOOD',          'Maintain and review annually')
+    @('FAQ page content',         'Lorem Ipsum placeholder -- never replaced', 'FE', 'CRITICAL -- replace with real content'),
+    @('FAQ page contact email',   'info@agroly.com (wrong company)',           'FE', 'CRITICAL -- update to real Bella Nico contact'),
+    @('Blog / news section',      'Does not exist',                           'FE', 'Create and begin publishing content'),
+    @('Plugin updates',           '16 plugins outdated',                      'BE', 'Update all plugins after site backup'),
+    @('AIOSEO version',           'v4.9.4.1 -- update to v4.9.6.2 available', 'BE', 'Update for AEO improvements in newer version'),
+    @('Elementor version',        'v3.25.6 -- major v4.0 release available',  'BE', 'Update after testing in staging environment'),
+    @('"Last Updated" dates',     'Missing on all pages',                     'BE', 'Add to all content pages via AIOSEO'),
+    @('Homepage year references', '2026 mentioned correctly -- GOOD',         'FE', 'Maintain and review annually')
 )
 for ($r=0;$r -lt $fad.Count;$r++) {
-    $isOk    = $fad[$r][2] -like '*GOOD*' -or $fad[$r][2] -like '*Maintain*'
-    $isUrgent = $fad[$r][2] -like '*URGENT*'
+    $isOk    = $fad[$r][3] -like '*GOOD*' -or $fad[$r][3] -like '*Maintain*'
+    $isUrgent = $fad[$r][3] -like '*CRITICAL*'
     $rbg = if ($isOk) { $BGGRN } elseif ($isUrgent) { $BGRED } else { $BGYEL }
     $rfg = if ($isOk) { $GREEN } elseif ($isUrgent) { $RED_T } else { $AMBER }
     TC $fat ($r+2) 1 $fad[$r][0] $false $DKGRAY 10 0
     TC $fat ($r+2) 2 $fad[$r][1] $false $DKGRAY 10 0
-    TC $fat ($r+2) 3 $fad[$r][2] $true  $rfg    10 0 $rbg
+    WhereBadge $fat ($r+2) 3 $fad[$r][2]
+    TC $fat ($r+2) 4 $fad[$r][3] $true  $rfg    10 0 $rbg
 }
 MoveOut $fat
 
@@ -482,23 +495,24 @@ NL; H2 'CONS'
 Body 'Every page is invisible to AI at the structured data level. AI tools cannot confirm what type of content they are reading, who wrote it, what product is being described, or what company owns the site.' $RED_T
 
 NL; H2 'Schema Opportunities -- Page by Page'
-$smt = MakeTable 9 4
-HRow $smt @('Page','Schema to Add','Citation Benefit','Effort')
+$smt = MakeTable 9 5
+HRow $smt @('Page','Schema to Add','Where','Citation Benefit','Effect Timeline')
 $smd = @(
-    @('Homepage',            'Organization, LocalBusiness',     'Company entity recognition on all AI platforms',     'Low -- AIOSEO settings panel'),
-    @('FAQ Page',            'FAQPage (after content is fixed)', 'Direct Q and A extraction for AI Overviews',        'Low -- AIOSEO after content updated'),
-    @('All product pages',   'Product, ItemList',               'Product query extraction -- buyers find products',   'Medium -- AIOSEO product templates'),
-    @('Veggie Values page',  'ItemList, Product',               'Category-level extraction for frozen veg queries',   'Low -- AIOSEO settings'),
-    @('Contact page',        'LocalBusiness, ContactPoint',     'Location and contact info extraction',               'Low -- AIOSEO settings'),
-    @('Bella Nico page',     'Organization, AboutPage',         'Brand identity and company history extraction',      'Low -- AIOSEO settings'),
-    @('All pages',           'BreadcrumbList',                  'Site structure clarity for AI crawlers',             'Low -- AIOSEO global setting'),
-    @('Careers page',        'JobPosting (when applicable)',    'Recruiter and employment query visibility',           'Low -- when jobs are posted')
+    @('Homepage',            'Organization, LocalBusiness',      'BE', 'Company entity recognition on all AI platforms',     'AI entity recognition in 2-4 weeks'),
+    @('FAQ Page',            'FAQPage (after content is fixed)', 'BE', 'Direct Q and A extraction for AI Overviews',         'Q and A extraction visible in 1-3 weeks'),
+    @('All product pages',   'Product, ItemList',                'BE', 'Product query extraction -- buyers find products',   'Product citations improve in 2-4 weeks'),
+    @('Veggie Values page',  'ItemList, Product',                'BE', 'Category-level extraction for frozen veg queries',   'Category visibility in 2-4 weeks'),
+    @('Contact page',        'LocalBusiness, ContactPoint',      'BE', 'Location and contact info extraction',               'Contact info in AI results in 1-2 weeks'),
+    @('Bella Nico page',     'Organization, AboutPage',          'BE', 'Brand identity and company history extraction',      'Brand entity improves in 2-4 weeks'),
+    @('All pages',           'BreadcrumbList',                   'BE', 'Site structure clarity for AI crawlers',             'Breadcrumbs visible within days of indexing'),
+    @('Careers page',        'JobPosting (when applicable)',     'BE', 'Recruiter and employment query visibility',           'Job listings show in AI results immediately')
 )
 for ($r=0;$r -lt $smd.Count;$r++) {
     TC $smt ($r+2) 1 $smd[$r][0] $false $DKGRAY 10 0
     TC $smt ($r+2) 2 $smd[$r][1] $true  $BLUE   10 0 $BGBLUE
-    TC $smt ($r+2) 3 $smd[$r][2] $false $GREEN  10 0 $BGGRN
-    TC $smt ($r+2) 4 $smd[$r][3] $false $DKGRAY 10 0
+    WhereBadge $smt ($r+2) 3 $smd[$r][2]
+    TC $smt ($r+2) 4 $smd[$r][3] $false $GREEN  10 0 $BGGRN
+    TC $smt ($r+2) 5 $smd[$r][4] $false $GREEN  10 0 $BGGRN
 }
 MoveOut $smt
 
@@ -529,19 +543,20 @@ Body 'No XML sitemap exists. Product pages with limited internal links may never
 Body 'No /llms.txt file. AI systems have no quick-reference context for the brand, requiring full site crawls to build even a basic understanding of the company.' $RED_T
 
 NL; H2 'Files to Create'
-$mft = MakeTable 5 4
-HRow $mft @('File','Purpose','Status','How to Create')
+$mft = MakeTable 5 5
+HRow $mft @('File','Purpose','Where','Status','How to Create')
 $mfd = @(
-    @('/robots.txt',   'Directs AI and search crawlers to key pages, blocks admin areas, enables structured crawl',         'MISSING', 'AIOSEO settings -- Tools -- Robots.txt editor'),
-    @('/sitemap.xml',  'Lists all important URLs for AI crawlers to discover product and content pages reliably',            'MISSING', 'AIOSEO settings -- Sitemaps -- enable and submit'),
-    @('/llms.txt',     'Plain-text brand summary for AI systems -- replaces full site crawl with instant brand context', 'MISSING', 'Create manually, upload to site root'),
-    @('/pricing.md',   'Plain-text product and pricing info for AI agents assisting buyers -- skipped if behind login wall', 'MISSING', 'Optional -- create when wholesale info available')
+    @('/robots.txt',   'Directs AI and search crawlers to key pages, blocks admin areas, enables structured crawl',          'BE', 'MISSING', 'AIOSEO settings -- Tools -- Robots.txt editor'),
+    @('/sitemap.xml',  'Lists all important URLs for AI crawlers to discover product and content pages reliably',             'BE', 'MISSING', 'AIOSEO settings -- Sitemaps -- enable and submit'),
+    @('/llms.txt',     'Plain-text brand summary for AI systems -- replaces full site crawl with instant brand context',     'BE', 'MISSING', 'Create manually, upload to site root'),
+    @('/pricing.md',   'Plain-text product and pricing info for AI agents assisting buyers -- optional when available',      'BE', 'MISSING', 'Optional -- create when wholesale info available')
 )
 for ($r=0;$r -lt $mfd.Count;$r++) {
     TC $mft ($r+2) 1 $mfd[$r][0] $true  $BLUE   10 0 $BGBLUE
     TC $mft ($r+2) 2 $mfd[$r][1] $false $DKGRAY 10 0
-    TC $mft ($r+2) 3 $mfd[$r][2] $true  $RED_T  10 0 $BGRED
-    TC $mft ($r+2) 4 $mfd[$r][3] $false $DKGRAY 10 0
+    WhereBadge $mft ($r+2) 3 $mfd[$r][2]
+    TC $mft ($r+2) 4 $mfd[$r][3] $true  $RED_T  10 0 $BGRED
+    TC $mft ($r+2) 5 $mfd[$r][4] $false $DKGRAY 10 0
 }
 MoveOut $mft
 
@@ -605,10 +620,12 @@ $hvd = @(
     @('Veggie Values vs Birds Eye vs Green Giant',     'Brand comparison page',                          'High')
 )
 for ($r=0;$r -lt $hvd.Count;$r++) {
-    $hiP = $hvd[$r][2] -eq 'High'
+    $hiP  = $hvd[$r][2] -eq 'High'
+    $pfg  = if ($hiP) { $GREEN } else { $AMBER }
+    $pbg  = if ($hiP) { $BGGRN } else { $BGYEL }
     TC $hvt ($r+2) 1 $hvd[$r][0] $false $DKGRAY 10 0
     TC $hvt ($r+2) 2 $hvd[$r][1] $false $DKGRAY 10 0
-    TC $hvt ($r+2) 3 $hvd[$r][2] $true  (if($hiP){$GREEN}else{$AMBER}) 10 1 (if($hiP){$BGGRN}else{$BGYEL})
+    TC $hvt ($r+2) 3 $hvd[$r][2] $true  $pfg    10 1 $pbg
 }
 MoveOut $hvt
 PB
@@ -647,43 +664,51 @@ PB
 H1 '11. Final Summary: Pros, Cons and Next Steps'
 HR
 
-$fst = MakeTable 8 4
-HRow $fst @('Pillar','PROS -- What is Working','CONS -- What Needs Fixing','Top Next Step')
+$fst = MakeTable 8 5
+HRow $fst @('Pillar','PROS -- What is Working','CONS -- What Needs Fixing','Where','Top Next Step')
 $fsd = @(
     @('AI Bot Access',
       'SSL active. AIOSEO can generate robots.txt and sitemap from settings panel.',
       'No robots.txt. No sitemap enabled. No llms.txt. Bots visit with no guidance.',
-      'Enable AIOSEO sitemap and create robots.txt through AIOSEO tools panel.'),
+      'BE',
+      'Enable AIOSEO sitemap and create robots.txt. Effect: crawlers guided within days.'),
     @('Content Structure',
       'Homepage brand story is specific and citable. Product chart has structured data.',
       'FAQ page is entirely Lorem Ipsum. Contact email shows wrong company. No real FAQ content.',
-      'Replace all FAQ page content. Fix contact email. Add real Q and A blocks.'),
+      'FE',
+      'Replace all FAQ page content. Fix contact email. Effect: AI re-index in 2-4 weeks.'),
     @('Authority and Trust',
       'First-to-market Mini Cob Corn claim. 31-year history. Top-5 sales rank.',
       'Best claims have no source. No certifications listed. No author attribution anywhere.',
-      'Add data source attribution to top-5 claim. List any food safety or quality standards.'),
+      'FE',
+      'Add source attribution to top-5 claim. List food safety or quality standards. Effect: citation rate improves in 4-8 weeks.'),
     @('Content Freshness',
       'Homepage references 2026 correctly. Clear packaging transition shows recent change.',
       'FAQ page is stale placeholder text. No blog. 16 plugin updates pending.',
-      'Replace FAQ content urgently. Schedule plugin updates with site backup.'),
+      'BT',
+      'Replace FAQ content. Schedule plugin updates with site backup. Effect: recency signals improve in 1-2 weeks.'),
     @('Schema Markup',
       'AIOSEO Pro is installed -- schema can be configured without any coding.',
       'AIOSEO schema module completely inactive. Zero schema on any page.',
-      'Open AIOSEO, configure Organization schema and enable global schema settings.'),
+      'BE',
+      'Open AIOSEO, configure Organization schema, enable global settings. Effect: AI entity recognition in 2-4 weeks.'),
     @('Machine-Readable Files',
       'AIOSEO can create robots.txt and sitemap -- no developer needed.',
       'No robots.txt. No sitemap.xml. No llms.txt. AI agents cannot read brand context.',
-      'Use AIOSEO to generate robots.txt and sitemap. Create llms.txt manually.'),
+      'BE',
+      'Generate robots.txt and sitemap via AIOSEO. Create llms.txt manually. Effect: AI brand context improves within days.'),
     @('Content Depth',
       'Homepage story and product chart are strong foundations to build from.',
       'Zero blog posts. No product descriptions. FAQ page has placeholder content.',
-      'Publish first blog post about Bella Nico brand story and Mini Cob Corn history.')
+      'FE',
+      'Publish first blog post about Bella Nico brand story and Mini Cob Corn history. Effect: citations possible in 4-8 weeks.')
 )
 for ($r=0;$r -lt $fsd.Count;$r++) {
     TC $fst ($r+2) 1 $fsd[$r][0] $true  $NAVY   10 0 $BGBLUE
     TC $fst ($r+2) 2 $fsd[$r][1] $false $GREEN  10 0 $BGGRN
     TC $fst ($r+2) 3 $fsd[$r][2] $false $RED_T  10 0 $BGRED
-    TC $fst ($r+2) 4 $fsd[$r][3] $false $DKGRAY 10 0 $BGYEL
+    WhereBadge $fst ($r+2) 4 $fsd[$r][3]
+    TC $fst ($r+2) 5 $fsd[$r][4] $false $DKGRAY 10 0 $BGYEL
 }
 MoveOut $fst
 

@@ -6,15 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 WordPress management and integration suite for **bellanico.com**. Enables remote site management, content operations, audits, and database access via SSH + WP-CLI and the WP REST API.
 
-**Site**: https://bellanico.com (WordPress on SiteGround)  
+**Site**: https://bellanico.com (WordPress 6.9.4 on SiteGround)  
+**Theme**: agroly-child 1.0  
+**Plugins**: 31 installed (28 active) — Elementor Pro, ACF Pro, AIOSEO, WPForms, SG CachePress, CF7  
 **GitHub**: `msakin-fds/bellanico.com`
 
 ## Environment Setup
 
 **Platform**: Windows 11 Pro, bash (Git Bash)  
-**SSH Key**: `C:\Users\SAKIN\.ssh\bellanico_rsa` (RSA 4096 — generate with `ssh-keygen -t rsa -b 4096 -f ~/.ssh/bellanico_rsa`)  
+**SSH Key**: `~/.ssh/bellanico_ed25519` (ED25519)  
+**SSH Access**: `u1376-vacs9qwmwnvs@giowm1081.siteground.biz:18765`  
+**WP Path**: `/home/u1376-vacs9qwmwnvs/www/bellanico.com/public_html`  
 
-SSH details and DB credentials go in `.env` (copy from `.env.example`). Never commit `.env`.
+All credentials live in `.env` (copy from `.env.example`). Never commit `.env`.
 
 ## Quick Start
 
